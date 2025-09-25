@@ -53,5 +53,20 @@ namespace John
             };
             return result;
         }
+
+        /// <summary>
+        /// Rounds a float to the nearest whole number.
+        /// </summary>
+        /// <param name="value">The float being rounded.</param>
+        /// <returns>An integer value.</returns>
+        public static int RoundToInt(float value)
+        {
+            // Casting a float to an int removes the decimal places (ie, 1.8943 -> 1)
+            int castedInt = (int)value;
+            float remainder = value - castedInt;
+            if (remainder < 0.5f) return castedInt;
+            else return castedInt + 1;
+        }
+
     }
 }

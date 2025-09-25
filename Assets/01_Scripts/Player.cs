@@ -7,7 +7,11 @@ public class Player : MonoBehaviour
     [Tooltip("The amount of time after one movement before the player can move again.")]
     [SerializeField] private float _coolDownAmount = 0.2f;
 
-    private float _moveCoolDown;
+    [SerializeField] private float _lerpSpeed = 1f;
+    private float _lerpFactor = 1f;
+    private Vector3 _lerpStartPos;
+    private Vector3 _lerpEndPos;
+
     private bool _up, _down, _left, _right;
     private float _deadZone = 0.2f;
 
@@ -17,7 +21,8 @@ public class Player : MonoBehaviour
     {
         _grid = FindFirstObjectByType<Grid>();
         if (_grid == null) Debug.LogError("No Grid component was found in the scene.");
-    } 
+        _grid.SetPlayer(this);
+    }
 
     void Start()
     {
@@ -27,11 +32,12 @@ public class Player : MonoBehaviour
     void Update()
     {
 
-        // If the move cool down is greater zero, decrease by the amount of time that has elapsed since the last update,
-        // and then return so that the player can't move until the cooldown is back at zero.
-        if (_moveCoolDown > 0f)
+        if (_lerpFactor < 1f)
         {
-            _moveCoolDown -= Time.deltaTime;
+            _lerpFactor += _lerpSpeed * Time.deltaTime;
+            Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
+            position.y = transform.position.y;
+            transform.position = position;
             return;
         }
 
@@ -46,6 +52,12 @@ public class Player : MonoBehaviour
         _right = horizontal > _deadZone;
         _left = horizontal < -_deadZone;
 
+        // If none of the directions were pressed, we don't need to do anything else.
+        if (!_up && !_down && !_right && !_left)
+        {
+            return;
+        }
+
         // Create a direction from the player input. We only want to allow the player to move one direction at a
         // time, so we use if else blocks to ensure only one direction is used.
         Vector3 direction = new();
@@ -54,18 +66,18 @@ public class Player : MonoBehaviour
         else if (_right) direction.x++;
         else if (_left) direction.x--;
 
+        // Set the player's forward direction to the direction we are moving.
+        transform.forward = direction;
+
         // Make sure the player is not moving out of the bounds of the grid.
         Vector3 newPosition = transform.position + direction;
-        if (_grid.IsOutOfBounds(newPosition)) return;
+        if (!_grid.CanTraverse(newPosition)) return;
 
-        // Move the player by adding the direction to the current position.
-        transform.position = newPosition;
-        
-        // If any direction was pressed, set our move cool down to the cooldown amount.
-        if (_up || _down || _left || _right)
-        {
-            _moveCoolDown = _coolDownAmount;
-        }
+        // Set variables for traversal between grid cells.
+        _lerpStartPos = transform.position;
+        _lerpEndPos = newPosition;
+        _lerpFactor = 0;
+        _grid.DiscardCell(_lerpStartPos);
 
     }
 
@@ -80,5 +92,10 @@ public class Player : MonoBehaviour
         position.z = Maths.RoundToInt(position.z);
         transform.position = position;
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        Destroy(other.gameObject);
+    } 
 
 }

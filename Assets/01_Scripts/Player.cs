@@ -1,101 +1,104 @@
 using UnityEngine;
 using John;
 
-public class Player : MonoBehaviour
-{
+namespace SoulCollector {
 
-    [Tooltip("The amount of time after one movement before the player can move again.")]
-    [SerializeField] private float _coolDownAmount = 0.2f;
+    public class Player : MonoBehaviour {
 
-    [SerializeField] private float _lerpSpeed = 1f;
-    private float _lerpFactor = 1f;
-    private Vector3 _lerpStartPos;
-    private Vector3 _lerpEndPos;
+        [Tooltip("The amount of time after one movement before the player can move again.")]
+        [SerializeField] private float _coolDownAmount = 0.2f;
 
-    private bool _up, _down, _left, _right;
-    private float _deadZone = 0.2f;
+        [SerializeField] private float _lerpSpeed = 1f;
+        private float _lerpFactor = 1f;
+        private Vector3 _lerpStartPos;
+        private Vector3 _lerpEndPos;
 
-    private Grid _grid;
+        private bool _up, _down, _left, _right;
+        private float _deadZone = 0.2f;
 
-    void Awake()
-    {
-        _grid = FindFirstObjectByType<Grid>();
-        if (_grid == null) Debug.LogError("No Grid component was found in the scene.");
-        _grid.SetPlayer(this);
-    }
+        private Grid _grid;
 
-    void Start()
-    {
-        SnapToGrid();
-    }
+        void Awake() {
 
-    void Update()
-    {
+            _grid = FindFirstObjectByType<Grid>();
+            if (_grid == null) Debug.LogError("No Grid component was found in the scene.");
+            _grid.SetPlayer(this);
 
-        if (_lerpFactor < 1f)
-        {
-            _lerpFactor += _lerpSpeed * Time.deltaTime;
-            Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
-            position.y = transform.position.y;
+        }
+
+        void Start() {
+
+            SnapToGrid();
+
+        }
+
+        void Update() {
+
+            if (_lerpFactor < 1f) {
+                _lerpFactor += _lerpSpeed * Time.deltaTime;
+                Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
+                position.y = transform.position.y;
+                transform.position = position;
+                return;
+            }
+
+            // Get player's input using GetAxis so that we can grab WASD, arrow, and gamepad controls.
+            float horizontal = Input.GetAxis("Horizontal");
+            float vertical = Input.GetAxis("Vertical");
+
+            // Unity's horizontal and vertical axis produce an analogue -1 to 1 value, we need an on or off,
+            // so convert them to bools factoring in a deadzone so the controls are not too sensitive.
+            _up = vertical > _deadZone;
+            _down = vertical < -_deadZone;
+            _right = horizontal > _deadZone;
+            _left = horizontal < -_deadZone;
+
+            // If none of the directions were pressed, we don't need to do anything else.
+            if (!_up && !_down && !_right && !_left) {
+                return;
+            }
+
+            // Create a direction from the player input. We only want to allow the player to move one direction at a
+            // time, so we use if else blocks to ensure only one direction is used.
+            Vector3 direction = new();
+            if (_up) direction.z++;
+            else if (_down) direction.z--;
+            else if (_right) direction.x++;
+            else if (_left) direction.x--;
+
+            // Set the player's forward direction to the direction we are moving.
+            transform.forward = direction;
+
+            // Make sure the player is not moving out of the bounds of the grid.
+            Vector3 newPosition = transform.position + direction;
+            if (!_grid.CanTraverse(newPosition)) return;
+
+            // Set variables for traversal between grid cells.
+            _lerpStartPos = transform.position;
+            _lerpEndPos = newPosition;
+            _lerpFactor = 0;
+            _grid.DiscardCell(_lerpStartPos);
+
+        }
+
+        /// <summary>
+        /// Snaps the transform to whole numbers on each axis, enforcing a defacto grid with cells of 1x1 units.
+        /// </summary>
+        private void SnapToGrid() {
+
+            Vector3 position = transform.position;
+            position.x = Maths.RoundToInt(position.x);
+            position.y = Maths.RoundToInt(position.y);
+            position.z = Maths.RoundToInt(position.z);
             transform.position = position;
-            return;
+
         }
 
-        // Get player's input using GetAxis so that we can grab WASD, arrow, and gamepad controls.
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        void OnTriggerEnter(Collider other) {
 
-        // Unity's horizontal and vertical axis produce an analogue -1 to 1 value, we need an on or off,
-        // so convert them to bools factoring in a deadzone so the controls are not too sensitive.
-        _up = vertical > _deadZone;
-        _down = vertical < -_deadZone;
-        _right = horizontal > _deadZone;
-        _left = horizontal < -_deadZone;
+            Destroy(other.gameObject);
 
-        // If none of the directions were pressed, we don't need to do anything else.
-        if (!_up && !_down && !_right && !_left)
-        {
-            return;
         }
 
-        // Create a direction from the player input. We only want to allow the player to move one direction at a
-        // time, so we use if else blocks to ensure only one direction is used.
-        Vector3 direction = new();
-        if (_up) direction.z++;
-        else if (_down) direction.z--;
-        else if (_right) direction.x++;
-        else if (_left) direction.x--;
-
-        // Set the player's forward direction to the direction we are moving.
-        transform.forward = direction;
-
-        // Make sure the player is not moving out of the bounds of the grid.
-        Vector3 newPosition = transform.position + direction;
-        if (!_grid.CanTraverse(newPosition)) return;
-
-        // Set variables for traversal between grid cells.
-        _lerpStartPos = transform.position;
-        _lerpEndPos = newPosition;
-        _lerpFactor = 0;
-        _grid.DiscardCell(_lerpStartPos);
-
     }
-
-    /// <summary>
-    /// Snaps the transform to whole numbers on each axis, enforcing a defacto grid with cells of 1x1 units.
-    /// </summary>
-    private void SnapToGrid()
-    {
-        Vector3 position = transform.position;
-        position.x = Maths.RoundToInt(position.x);
-        position.y = Maths.RoundToInt(position.y);
-        position.z = Maths.RoundToInt(position.z);
-        transform.position = position;
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        Destroy(other.gameObject);
-    } 
-
 }

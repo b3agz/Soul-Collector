@@ -1,17 +1,20 @@
 using UnityEngine;
 
-public class Tile : MonoBehaviour
-{
+namespace SoulCollector {
 
-    [SerializeField] private float _dropSpeed = 1f;
-    public bool DestroySelf = false;
+    public class Tile : MonoBehaviour {
 
-    void Update()
-    {
-        if (!DestroySelf) return;
+        [SerializeField] private float _dropSpeed = 1f;
+        public bool DestroySelf = false;
 
-        transform.position += Vector3.down * Time.deltaTime * _dropSpeed;
-        
-    } 
+        void Update() {
+
+            if (!DestroySelf) return;
+
+            transform.position += Vector3.down * Time.deltaTime * _dropSpeed;
+
+        }
+
+    }
 
 }

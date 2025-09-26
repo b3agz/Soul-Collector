@@ -9,9 +9,14 @@ namespace SoulCollector {
         [SerializeField] private float _coolDownAmount = 0.2f;
 
         [SerializeField] private float _lerpSpeed = 1f;
+
+        [SerializeField] private AnimationCurve _leanCurve;
+        [SerializeField] private float _leanAmount = 5f;
+
         private float _lerpFactor = 1f;
         private Vector3 _lerpStartPos;
         private Vector3 _lerpEndPos;
+        private Transform _meshesObject;
 
         private bool _up, _down, _left, _right;
         private float _deadZone = 0.2f;
@@ -23,6 +28,7 @@ namespace SoulCollector {
             _grid = FindFirstObjectByType<Grid>();
             if (_grid == null) Debug.LogError("No Grid component was found in the scene.");
             _grid.SetPlayer(this);
+            _meshesObject = transform.Find("Meshes");
 
         }
 
@@ -39,6 +45,7 @@ namespace SoulCollector {
                 Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
                 position.y = transform.position.y;
                 transform.position = position;
+                Lean();
                 return;
             }
 
@@ -78,6 +85,13 @@ namespace SoulCollector {
             _lerpEndPos = newPosition;
             _lerpFactor = 0;
             _grid.DiscardCell(_lerpStartPos);
+
+        }
+
+        private void Lean() {
+            if (_meshesObject == null) return;
+            float lean = _leanAmount * _leanCurve.Evaluate(_lerpFactor);
+            _meshesObject.localRotation = Quaternion.Euler(lean, 0f, 0f);
 
         }
 

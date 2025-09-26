@@ -23,7 +23,7 @@ namespace SoulCollector {
         // For setting the camera to the middle of the grid.
         public float HalfGrid => _gridSize / 2f;
 
-        GameObject[,] _grid;
+        Tile[,] _grid;
 
         void Start() {
 
@@ -39,7 +39,7 @@ namespace SoulCollector {
         private void CreateGrid() {
 
             // Initialise new 2D array to store the grid cells in so that we can reference them later.
-            _grid = new GameObject[_gridSize, _gridSize];
+            _grid = new Tile[_gridSize, _gridSize];
 
             // Loop through each row.
             for (int x = 0; x < _gridSize; x++) {
@@ -48,7 +48,7 @@ namespace SoulCollector {
                 for (int z = 0; z < _gridSize; z++) {
 
                     Vector3 position = new(x, 0f, z);
-                    GameObject newCell = Instantiate(_gridCellPrefab.gameObject, position, Quaternion.identity, transform);
+                    Tile newCell = Instantiate(_gridCellPrefab, position, Quaternion.identity, transform);
                     newCell.name = $"{x}, {z}";
                     _grid[x, z] = newCell;
 
@@ -110,7 +110,7 @@ namespace SoulCollector {
             int z = Maths.RoundToInt(position.z);
 
             // If the cell has been destroyed, we cannot traverse it.
-            if (_grid[x, z] == null) return false;
+            if (_grid[x, z] == null || _grid[x, z].DestroySelf) return false;
 
             // If we get here, we can traverse it.
             return true;
@@ -132,7 +132,7 @@ namespace SoulCollector {
             int z = Maths.RoundToInt(position.z);
 
             // Handle the grid cell.
-            Destroy(_grid[x, z]);
+            _grid[x, z].DestroySelf = true;
         }
     }
 

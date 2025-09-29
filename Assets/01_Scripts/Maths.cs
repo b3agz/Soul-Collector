@@ -1,7 +1,7 @@
 using UnityEngine;
 
 namespace John {
-    
+
     /// <summary>
     /// A collection of maths functions written by John Bullock for the SAE Institute Games Programming
     /// module 4FSC0PE001.
@@ -61,6 +61,8 @@ namespace John {
             if (remainder < 0.5f) return castedInt;
             else return castedInt + 1;
         }
+        
+        // Distance
 
     }
 }

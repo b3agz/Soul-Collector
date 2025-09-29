@@ -97,3 +97,7 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# A folder for random tasks and demonstrations for uni, doesn't need to be in the repo.
+/[Aa]ssets/[Uu]ni[Ww]ork/
+/[Aa]ssets/[Uu]ni[Ww]ork.*

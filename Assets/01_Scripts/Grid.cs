@@ -6,6 +6,17 @@ namespace SoulCollector {
 
     public class Grid : MonoBehaviour {
 
+        public static Grid Instance { get; private set; }
+        void Awake() {
+            if (Instance != null && Instance != this) {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
+
+        public Shake CameraShake;
+
         [Tooltip("The width and depth of the play area.")]
         [SerializeField] private int _gridSize = 5;
 
@@ -43,7 +54,6 @@ namespace SoulCollector {
 
             // Loop through each row.
             for (int x = 0; x < _gridSize; x++) {
-
                 // Loop through each column.
                 for (int z = 0; z < _gridSize; z++) {
 
@@ -57,23 +67,27 @@ namespace SoulCollector {
             PlaceObjects();
         }
 
+        /// <summary>
+        /// Creates a list of all positions in the level grid and uses that list to spawn
+        /// collectables at random positions on the grid. Everytime a position is used, it
+        /// is removed from the list to ensure it is not used again.
+        /// </summary>
         private void PlaceObjects() {
 
             List<Vector2Int> positions = new();
             for (int x = 0; x < _gridSize; x++) {
-
                 for (int z = 0; z < _gridSize; z++) {
                     positions.Add(new(x, z));
                 }
             }
 
-            for (int i = 0; i < _numberOfCollectables; i++) {
-
+            int i = 0;
+            while (i < _numberOfCollectables) {
                 int rndIndex = Random.Range(0, positions.Count);
                 Vector3 position = new(positions[rndIndex].x, 0f, positions[rndIndex].y);
                 GameObject newCollectable = Instantiate(_collectablePrefab, position, Quaternion.identity, transform);
                 positions.RemoveAt(rndIndex);
-
+                i++;
             }
 
             int playerIndex = Random.Range(0, positions.Count);

@@ -18,8 +18,12 @@ namespace SoulCollector {
         private Vector3 _lerpEndPos;
         private Transform _meshesObject;
 
-        private bool _up, _down, _left, _right;
+        [SerializeField] private bool _up, _down, _left, _right;
+        [SerializeField] private bool _directionPressed;
+        [SerializeField] private bool _isLeaning;
         private float _deadZone = 0.2f;
+
+        [SerializeField] private GameObject _particles;
 
         private Grid _grid;
 
@@ -40,6 +44,8 @@ namespace SoulCollector {
 
         void Update() {
 
+            GetInput();
+
             if (_lerpFactor < 1f) {
                 _lerpFactor += _lerpSpeed * Time.deltaTime;
                 Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
@@ -49,16 +55,7 @@ namespace SoulCollector {
                 return;
             }
 
-            // Get player's input using GetAxis so that we can grab WASD, arrow, and gamepad controls.
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
-
-            // Unity's horizontal and vertical axis produce an analogue -1 to 1 value, we need an on or off,
-            // so convert them to bools factoring in a deadzone so the controls are not too sensitive.
-            _up = vertical > _deadZone;
-            _down = vertical < -_deadZone;
-            _right = horizontal > _deadZone;
-            _left = horizontal < -_deadZone;
+            
 
             // If none of the directions were pressed, we don't need to do anything else.
             if (!_up && !_down && !_right && !_left) {
@@ -88,9 +85,55 @@ namespace SoulCollector {
 
         }
 
+        /// <summary>
+        /// Gets the player's input and sets the relevant variables accordingly.
+        /// </summary>
+        private void GetInput() {
+
+            // Get player's input using GetAxis so that we can grab WASD, arrow, and gamepad controls.
+            float horizontal = Input.GetAxis("Horizontal");
+            float vertical = Input.GetAxis("Vertical");
+
+            // Unity's horizontal and vertical axis produce an analogue -1 to 1 value, we need an on or off,
+            // so convert them to bools factoring in a deadzone so the controls are not too sensitive.
+            _up = vertical > _deadZone;
+            _down = vertical < -_deadZone;
+            _right = horizontal > _deadZone;
+            _left = horizontal < -_deadZone;
+
+            // Get whether any direction is currently veing pressed.
+            _directionPressed = _up || _down || _right || _left;
+
+        }
+
+        /// <summary>
+        /// Adjusts the rotation of the character's meshes based on movement to give the impression
+        /// or leaning.
+        /// </summary>
         private void Lean() {
+
+            // If we don't have a meshes object, return rather than throwing an error.
             if (_meshesObject == null) return;
-            float lean = _leanAmount * _leanCurve.Evaluate(_lerpFactor);
+
+            // If we are currently leaning but no direction is being pressed, set leaning to
+            // false. Else if direction is pressed and our lean factor is over half way, set it
+            // to true.
+            if (!_directionPressed) _isLeaning = false;
+            else if (_directionPressed && _lerpFactor > 0.49f) _isLeaning = true;
+
+            float modifiedLerpFactor = _lerpFactor;
+
+            // If we are currently leaning, force our lerp factor to 0.5f.
+            if (_isLeaning) {
+                modifiedLerpFactor = 0.5f;
+            }
+
+            // Calculate how much to lean.
+            float lean = _leanAmount * _leanCurve.Evaluate(modifiedLerpFactor);
+
+            // Set the rotation of the player character. We are only adjusting the local rotation
+            // of the mesh, which is a child object of player object. As the player object always faces
+            // "forward", we only need to rotate the local X axis.
             _meshesObject.localRotation = Quaternion.Euler(lean, 0f, 0f);
 
         }
@@ -110,7 +153,11 @@ namespace SoulCollector {
 
         void OnTriggerEnter(Collider other) {
 
-            Destroy(other.gameObject);
+            if (other.CompareTag("Collectable")) {
+                GameObject particles = Instantiate(_particles, other.transform.position, Quaternion.identity);
+                Grid.Instance.CameraShake.ShakeIt();
+                Destroy(other.gameObject);
+            }
 
         }
 

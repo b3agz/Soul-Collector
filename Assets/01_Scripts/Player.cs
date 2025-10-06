@@ -44,18 +44,22 @@ namespace SoulCollector {
 
         void Update() {
 
-            GetInput();
-
-            if (_lerpFactor < 1f) {
-                _lerpFactor += _lerpSpeed * Time.deltaTime;
-                Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
-                position.y = transform.position.y;
-                transform.position = position;
-                Lean();
-                return;
+            if (!_grid.SuspendControls) {
+                GetInput();
+            } else {
+                _up = _down = _left = _right = false;
             }
 
-            
+            if (_lerpFactor < 1f) {
+                    _lerpFactor += _lerpSpeed * Time.deltaTime;
+                    Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
+                    position.y = transform.position.y;
+                    transform.position = position;
+                    Lean();
+                    return;
+                }
+
+
 
             // If none of the directions were pressed, we don't need to do anything else.
             if (!_up && !_down && !_right && !_left) {
@@ -155,6 +159,7 @@ namespace SoulCollector {
 
             if (other.CompareTag("Collectable")) {
                 GameObject particles = Instantiate(_particles, other.transform.position, Quaternion.identity);
+                _grid.IncrementScore();
                 Grid.Instance.CameraShake.ShakeIt();
                 Destroy(other.gameObject);
             }

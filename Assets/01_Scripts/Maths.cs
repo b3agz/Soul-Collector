@@ -22,6 +22,19 @@ namespace John {
         }
 
         /// <summary>
+        /// Clamps <paramref name="value"/> between <paramref name="min"/> and <paramref name="max"/>.
+        /// </summary>
+        /// <param name="value">The float being clamped.</param>
+        /// <param name="min">The minimum value to be clamped to.</param>
+        /// <param name="max">The maximum value to be clamped to.</param>
+        /// <returns>A int between min and max.</returns>
+        public static int Clamp(int value, int min, int max) {
+            if (value < min) return min;
+            else if (value > max) return max;
+            else return value;
+        }
+
+        /// <summary>
         /// Performs a linear interpolation between two floats.
         /// </summary>
         /// <param name="start">The start value.</param>
@@ -60,6 +73,17 @@ namespace John {
             float remainder = value - castedInt;
             if (remainder < 0.5f) return castedInt;
             else return castedInt + 1;
+        }
+
+        /// <summary>
+        /// Returns the largest of two integers.
+        /// </summary>
+        /// <param name="a">The first integer.</param>
+        /// <param name="b">The second integer.</param>
+        /// <returns>An integer with the value of the largest of a and b.</returns>
+        public static int Max(int a, int b) {
+            if (a > b) return a;
+            else return b;
         }
         
         // Distance

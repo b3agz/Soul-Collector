@@ -13,6 +13,9 @@ namespace SoulCollector {
                 return;
             }
             Instance = this;
+
+            Application.targetFrameRate = 60;
+
         }
 
         public Shake CameraShake;
@@ -23,13 +26,22 @@ namespace SoulCollector {
         [Tooltip("The number the collectables in this grid.")]
         [SerializeField] private int _numberOfCollectables = 5;
 
-        [Tooltip("The prefab for a single grid cell.")]
-        [SerializeField] private Tile _gridCellPrefab;
+        [Tooltip("The prefab for a solid floor tile.")]
+        [SerializeField] private Tile _solidTile;
+
+        [Tooltip("The prefab for a drop floor tile.")]
+        [SerializeField] private Tile _dropTile;
 
         [Tooltip("The prefab for the collectables")]
         [SerializeField] private GameObject _collectablePrefab;
 
+        [Tooltip("The score UI Element.")]
+        [SerializeField] private Score _score;
+
         private Player _player;
+        private int _currentScore;
+
+        public bool SuspendControls { get; private set; }
 
         // For setting the camera to the middle of the grid.
         public float HalfGrid => _gridSize / 2f;
@@ -39,6 +51,7 @@ namespace SoulCollector {
         void Start() {
 
             CreateGrid();
+            UpdateScore(true);
 
         }
 
@@ -57,8 +70,12 @@ namespace SoulCollector {
                 // Loop through each column.
                 for (int z = 0; z < _gridSize; z++) {
 
+                    int rnd = Random.Range(0, 10);
+                    if (rnd > 8) continue;
+                    Tile prefab = (rnd > 6) ? _dropTile : _solidTile;
+
                     Vector3 position = new(x, 0f, z);
-                    Tile newCell = Instantiate(_gridCellPrefab, position, Quaternion.identity, transform);
+                    Tile newCell = Instantiate(prefab, position, Quaternion.identity, transform);
                     newCell.name = $"{x}, {z}";
                     _grid[x, z] = newCell;
 
@@ -146,8 +163,24 @@ namespace SoulCollector {
             int z = Maths.RoundToInt(position.z);
 
             // Handle the grid cell.
-            _grid[x, z].DestroySelf = true;
+            _grid[x, z].DropTile();
         }
-    }
 
+        /// <summary>
+        /// Updates the score UI element to reflect the current score.
+        /// </summary>
+        public void UpdateScore(bool suppressBounce = false) => _score.UpdateScore(_currentScore, _numberOfCollectables, suppressBounce);
+
+        /// <summary>
+        /// Increments the current score and updates the UI element to reflect the change.
+        /// </summary>
+        public void IncrementScore() {
+            _score.UpdateScore(++_currentScore, _numberOfCollectables);
+            if (_currentScore >= _numberOfCollectables) {
+                Debug.Log("You Win!");
+                SuspendControls = true;
+            }
+        }
+
+    }
 }

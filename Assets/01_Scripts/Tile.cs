@@ -4,8 +4,14 @@ namespace SoulCollector {
 
     public class Tile : MonoBehaviour {
 
+        [SerializeField] private bool _isDestructable = false;
         [SerializeField] private float _dropSpeed = 1f;
-        public bool DestroySelf = false;
+        public bool DestroySelf { get; private set; } = false;
+
+        public void DropTile() {
+            if (!_isDestructable) return;
+            DestroySelf = true;
+        }
 
         void Update() {
 

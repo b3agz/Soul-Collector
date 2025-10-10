@@ -2,12 +2,14 @@ using UnityEngine;
 using John;
 using UnityEngine.UI;
 using System.Collections;
+using TMPro;
 
 namespace SoulCollector {
 
     public class Score : MonoBehaviour {
 
         [SerializeField] private Slider _slider;
+        [SerializeField] private TextMeshProUGUI _scoreNumber;
         [SerializeField] private float _slideSpeed = 8f;
         [SerializeField] private AnimationCurve _bounceCurve;
         [SerializeField] private float _bounceSpeed = 5f;
@@ -26,7 +28,7 @@ namespace SoulCollector {
         public void UpdateScore(int score, int maxScore, bool suppressBounce = false) {
             _slider.maxValue = maxScore;
             _target = score;
-
+            _scoreNumber.text = score.ToString();
             if (suppressBounce) return;
 
             if (_bounceRoutine != null) {
@@ -42,9 +44,12 @@ namespace SoulCollector {
             float factor = 0f;
             while (factor < 1f) {
                 transform.localScale = Vector3.one + (bounceVector * _bounceCurve.Evaluate(factor));
+                _scoreNumber.transform.localScale = (Vector3.one * 1.3f) + (bounceVector * _bounceCurve.Evaluate(factor));
                 factor += Time.deltaTime * _bounceSpeed;
                 yield return null;
             }
+                transform.localScale = Vector3.one;
+                _scoreNumber.transform.localScale = Vector3.one;
         }
 
     }

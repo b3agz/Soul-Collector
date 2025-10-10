@@ -38,8 +38,12 @@ namespace SoulCollector {
         [Tooltip("The score UI Element.")]
         [SerializeField] private Score _score;
 
-        private Player _player;
+        [Tooltip("The player character.")]
+        [SerializeField] private Player _player;
+
         private int _currentScore;
+
+        public bool HasCollectedAll =>_currentScore >= _numberOfCollectables;
 
         public bool SuspendControls { get; private set; }
 
@@ -48,14 +52,24 @@ namespace SoulCollector {
 
         Tile[,] _grid;
 
-        void Start() {
-
+        /// <summary>
+        /// Resets/Creates a new grid to play.
+        /// </summary>
+        public void NewGame() {
+            _currentScore = 0;
             CreateGrid();
             UpdateScore(true);
-
+            PlaceObjects();
+            SuspendControls = false;
         }
 
-        public void SetPlayer(Player player) => _player = player;
+        public void ClearGrid() {
+
+            foreach (Transform child in transform) {
+                Destroy(child.gameObject);
+            }
+            _player.gameObject.SetActive(false);
+        }
 
         /// <summary>
         /// Creates a grid using instantiated _gridCellPrefabs to a size of _gridSize.
@@ -81,7 +95,6 @@ namespace SoulCollector {
 
                 }
             }
-            PlaceObjects();
         }
 
         /// <summary>
@@ -94,6 +107,7 @@ namespace SoulCollector {
             List<Vector2Int> positions = new();
             for (int x = 0; x < _gridSize; x++) {
                 for (int z = 0; z < _gridSize; z++) {
+                    if (!CanTraverse(x, z)) continue;
                     positions.Add(new(x, z));
                 }
             }
@@ -110,6 +124,8 @@ namespace SoulCollector {
             int playerIndex = Random.Range(0, positions.Count);
             Vector3 playerPos = new(positions[playerIndex].x, 0f, positions[playerIndex].y);
             _player.transform.position = playerPos;
+            _player.transform.forward = new Vector3(0f, 0f, -1f);
+            _player.gameObject.SetActive(true);
 
         }
 
@@ -125,6 +141,14 @@ namespace SoulCollector {
             return false;
 
         }
+
+        /// <summary>
+        /// Checks if a given position is traversable.
+        /// </summary>
+        /// <param name="x">The horizontal tile coordinate.</param>
+        /// <param name="y">The vertical tile coordinate.</param>
+        /// <returns>True if the position is traversable.</returns>
+        public bool CanTraverse(int x, int y) => CanTraverse(new(x, 0f, y));
 
         /// <summary>
         /// Checks if a given position is traversable.
@@ -177,7 +201,6 @@ namespace SoulCollector {
         public void IncrementScore() {
             _score.UpdateScore(++_currentScore, _numberOfCollectables);
             if (_currentScore >= _numberOfCollectables) {
-                Debug.Log("You Win!");
                 SuspendControls = true;
             }
         }

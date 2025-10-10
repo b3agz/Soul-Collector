@@ -31,7 +31,6 @@ namespace SoulCollector {
 
             _grid = FindFirstObjectByType<Grid>();
             if (_grid == null) Debug.LogError("No Grid component was found in the scene.");
-            _grid.SetPlayer(this);
             _meshesObject = transform.Find("Meshes");
 
         }

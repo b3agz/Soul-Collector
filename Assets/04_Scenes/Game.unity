@@ -172,7 +172,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -3088,11 +3088,11 @@ RectTransform:
   - {fileID: 1523660761}
   m_Father: {fileID: 61186779}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 11.628975, y: 202.40001}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0.0000038146973, y: -10}
   m_SizeDelta: {x: 273.25793, y: 45.536102}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &1766244832
 GameObject:
   m_ObjectHideFlags: 0
@@ -4036,6 +4036,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 252713207270320059, guid: c346c4fa2a2e1ba4687dfd7e06357803, type: 3}
       propertyPath: _particles
+      value: 
+      objectReference: {fileID: 2076810768793415554, guid: fd7004c91aaba034f855e363bd49acf5, type: 3}
+    - target: {fileID: 252713207270320059, guid: c346c4fa2a2e1ba4687dfd7e06357803, type: 3}
+      propertyPath: _particlesPrefab
       value: 
       objectReference: {fileID: 2076810768793415554, guid: fd7004c91aaba034f855e363bd49acf5, type: 3}
     - target: {fileID: 1067640136667020524, guid: c346c4fa2a2e1ba4687dfd7e06357803, type: 3}

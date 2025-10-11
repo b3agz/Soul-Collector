@@ -52,6 +52,10 @@ namespace SoulCollector {
 
         Tile[,] _grid;
 
+        void Start() {
+            NewGame();
+        }
+
         /// <summary>
         /// Resets/Creates a new grid to play.
         /// </summary>
@@ -63,8 +67,13 @@ namespace SoulCollector {
             SuspendControls = false;
         }
 
+        /// <summary>
+        /// Destroys all of the spawned items (grid tiles and collectables) and disables the player object.
+        /// </summary>
         public void ClearGrid() {
-
+            
+            // All instantiated level objects are spawned as children of this object, so to remove any that are
+            // still in the scene, we just need to loop through the remaining children of this GameObject.
             foreach (Transform child in transform) {
                 Destroy(child.gameObject);
             }
@@ -104,6 +113,7 @@ namespace SoulCollector {
         /// </summary>
         private void PlaceObjects() {
 
+            // Loop through all of the grid positions and, if they are traversible, add them to a list.
             List<Vector2Int> positions = new();
             for (int x = 0; x < _gridSize; x++) {
                 for (int z = 0; z < _gridSize; z++) {
@@ -112,8 +122,11 @@ namespace SoulCollector {
                 }
             }
 
+            // Loop until either we have placed the desired number of collectables or we have run out of valid positions.
+            // For each iteration, get a random position from the list. Since the list only contains valid cells, we can put
+            // a collectable at any of the locations. Once used, we remove it from the list so that it isn't used again.
             int i = 0;
-            while (i < _numberOfCollectables) {
+            while (i < _numberOfCollectables || positions.Count < 1) {
                 int rndIndex = Random.Range(0, positions.Count);
                 Vector3 position = new(positions[rndIndex].x, 0f, positions[rndIndex].y);
                 GameObject newCollectable = Instantiate(_collectablePrefab, position, Quaternion.identity, transform);

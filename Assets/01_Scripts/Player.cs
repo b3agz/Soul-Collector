@@ -8,29 +8,30 @@ namespace SoulCollector {
         [Tooltip("The amount of time after one movement before the player can move again.")]
         [SerializeField] private float _coolDownAmount = 0.2f;
 
+        [Tooltip("How quickly the character lerps from one position to another.")]
         [SerializeField] private float _lerpSpeed = 1f;
 
+        [Tooltip("Curve that determines the speed of the character's lean when moving.")]
         [SerializeField] private AnimationCurve _leanCurve;
+
+        [Tooltip("How far the character leans (on the X rotation axis) when at the peak of the curve.")]
         [SerializeField] private float _leanAmount = 5f;
+
+        [Tooltip("Particles prefab that is spawned every time the player collects a collectable.")]
+        [SerializeField] private GameObject _particlesPrefab;
 
         private float _lerpFactor = 1f;
         private Vector3 _lerpStartPos;
         private Vector3 _lerpEndPos;
         private Transform _meshesObject;
 
-        [SerializeField] private bool _up, _down, _left, _right;
-        [SerializeField] private bool _directionPressed;
-        [SerializeField] private bool _isLeaning;
+        private bool _up, _down, _left, _right;
+        private bool _directionPressed;
+        private bool _isLeaning;
         private float _deadZone = 0.2f;
-
-        [SerializeField] private GameObject _particles;
-
-        private Grid _grid;
 
         void Awake() {
 
-            _grid = FindFirstObjectByType<Grid>();
-            if (_grid == null) Debug.LogError("No Grid component was found in the scene.");
             _meshesObject = transform.Find("Meshes");
 
         }
@@ -43,20 +44,24 @@ namespace SoulCollector {
 
         void Update() {
 
-            if (!_grid.SuspendControls) {
+            // If the player controls aren't suspended, get the player's inputs. Otherwise, make sure the direction
+            // bools are set to false.
+            if (!Grid.Instance.SuspendControls) {
                 GetInput();
-            } else {
+            }
+            else {
                 _up = _down = _left = _right = false;
             }
 
+            // If the lerp factor is less than one, that means we are currently moving, so move the character.
             if (_lerpFactor < 1f) {
-                    _lerpFactor += _lerpSpeed * Time.deltaTime;
-                    Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
-                    position.y = transform.position.y;
-                    transform.position = position;
-                    Lean();
-                    return;
-                }
+                _lerpFactor += _lerpSpeed * Time.deltaTime;
+                Vector3 position = Maths.Lerp(_lerpStartPos, _lerpEndPos, _lerpFactor);
+                position.y = transform.position.y;
+                transform.position = position;
+                Lean();
+                return;
+            }
 
 
 
@@ -78,13 +83,13 @@ namespace SoulCollector {
 
             // Make sure the player is not moving out of the bounds of the grid.
             Vector3 newPosition = transform.position + direction;
-            if (!_grid.CanTraverse(newPosition)) return;
+            if (!Grid.Instance.CanTraverse(newPosition)) return;
 
             // Set variables for traversal between grid cells.
             _lerpStartPos = transform.position;
             _lerpEndPos = newPosition;
             _lerpFactor = 0;
-            _grid.DiscardCell(_lerpStartPos);
+            Grid.Instance.DiscardCell(_lerpStartPos);
 
         }
 
@@ -157,8 +162,8 @@ namespace SoulCollector {
         void OnTriggerEnter(Collider other) {
 
             if (other.CompareTag("Collectable")) {
-                GameObject particles = Instantiate(_particles, other.transform.position, Quaternion.identity);
-                _grid.IncrementScore();
+                GameObject particles = Instantiate(_particlesPrefab, other.transform.position, Quaternion.identity);
+                Grid.Instance.IncrementScore();
                 Grid.Instance.CameraShake.ShakeIt();
                 Destroy(other.gameObject);
             }

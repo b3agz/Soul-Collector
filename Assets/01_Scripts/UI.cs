@@ -1,9 +1,9 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SoulCollector {
     public class UI : MonoBehaviour {
 
-        [SerializeField] private GameObject _mainMenu;
         [SerializeField] private GameObject _pauseMenu;
         [SerializeField] private GameObject _gameOverMenu;
         [SerializeField] private GameObject _gameWonMenu;
@@ -12,7 +12,6 @@ namespace SoulCollector {
 
         public UIState State {
             get {
-                if (_mainMenu != null && _mainMenu.activeSelf) return UIState.Main;
                 if (_pauseMenu != null && _pauseMenu.activeSelf) return UIState.Pause;
                 if (_gameOverMenu != null && _gameOverMenu.activeSelf) return UIState.GameOver;
                 if (_gameWonMenu != null && _gameWonMenu.activeSelf) return UIState.GameWon;
@@ -21,7 +20,6 @@ namespace SoulCollector {
         }
 
         void Start() {
-            MainMenu();
         }
 
         void Update() {
@@ -40,17 +38,18 @@ namespace SoulCollector {
             }
         }
 
+        /// <summary>
+        /// Ensures timeScale is set back to 1 and loads the main menu scene.
+        /// </summary>
         public void MainMenu() {
-            Grid.Instance.ClearGrid();
-            SetMenu(_scoreBoard, false);
-            SetMenu(_mainMenu, true);
-            SetMenu(_mainMenuAssets, true);
-            SetMenu(_gameWonMenu, false);
-            UnPauseGame();
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("MainMenu");
         }
 
+        /// <summary>
+        /// Starts a new game, disabling all the menus and calling the relevant functions to reset the level.
+        /// </summary>
         public void NewGame() {
-            SetMenu(_mainMenu, false);
             SetMenu(_gameWonMenu, false);
             SetMenu(_scoreBoard, true);
             SetMenu(_mainMenuAssets, false);
@@ -59,15 +58,24 @@ namespace SoulCollector {
             Grid.Instance.NewGame();
         }
 
+        /// <summary>
+        /// Closes the game when run as an application (does not work in editor or web build).
+        /// </summary>
         public void ExitGame() {
             Application.Quit();
         }
 
+        /// <summary>
+        /// Sets timeScale to zero to stop player movement and other activity, opens the pause menu.
+        /// </summary>
         public void PauseGame() {
             Time.timeScale = 0f;
             _pauseMenu.SetActive(true);
         }
 
+        /// <summary>
+        /// Sets timeScale back to 1 and closes the pause menu.
+        /// </summary>
         public void UnPauseGame() {
             Time.timeScale = 1f;
             _pauseMenu.SetActive(false);
@@ -86,7 +94,6 @@ namespace SoulCollector {
 
     public enum UIState {
 
-        Main,
         Pause,
         GameOver,
         GameWon,

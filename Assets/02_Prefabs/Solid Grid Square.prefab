@@ -131,5 +131,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01d8ef32045ee3e48bca4dd26cf1d353, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _colLerpSpeed: 3
   _dropSpeed: 10
-  DestroySelf: 0
+  _colours:
+  - {r: 0.8352941, g: 0.28235295, b: 0.16470589, a: 1}
+  - {r: 0.7433963, g: 0.4811872, b: 0.043481633, a: 1}
+  - {r: 0.5374695, g: 0.7132075, b: 0.10092549, a: 1}
+  _meshRenderer: {fileID: 5789468757900895886}

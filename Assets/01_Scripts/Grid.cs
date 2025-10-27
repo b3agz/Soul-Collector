@@ -27,10 +27,7 @@ namespace SoulCollector {
         [SerializeField] private int _numberOfCollectables = 5;
 
         [Tooltip("The prefab for a solid floor tile.")]
-        [SerializeField] private Tile _solidTile;
-
-        [Tooltip("The prefab for a drop floor tile.")]
-        [SerializeField] private Tile _dropTile;
+        [SerializeField] private Tile _floorTile;
 
         [Tooltip("The prefab for the collectables")]
         [SerializeField] private GameObject _collectablePrefab;
@@ -41,6 +38,9 @@ namespace SoulCollector {
         [Tooltip("The player character.")]
         [SerializeField] private Player _player;
 
+        [Tooltip("The cannon controller.")]
+        [SerializeField] private Turret _turret;
+
         private int _currentScore;
 
         public bool HasCollectedAll =>_currentScore >= _numberOfCollectables;
@@ -50,7 +50,7 @@ namespace SoulCollector {
         // For setting the camera to the middle of the grid.
         public float HalfGrid => _gridSize / 2f;
 
-        Tile[,] _grid;
+        Dictionary<Vector2Int, Tile> _grid = new();
 
         void Start() {
             NewGame();
@@ -85,9 +85,6 @@ namespace SoulCollector {
         /// </summary>
         private void CreateGrid() {
 
-            // Initialise new 2D array to store the grid cells in so that we can reference them later.
-            _grid = new Tile[_gridSize, _gridSize];
-
             // Loop through each row.
             for (int x = 0; x < _gridSize; x++) {
                 // Loop through each column.
@@ -95,12 +92,13 @@ namespace SoulCollector {
 
                     int rnd = Random.Range(0, 10);
                     if (rnd > 8) continue;
-                    Tile prefab = (rnd > 6) ? _dropTile : _solidTile;
-
+                    
                     Vector3 position = new(x, 0f, z);
-                    Tile newCell = Instantiate(prefab, position, Quaternion.identity, transform);
+                    Tile newCell = Instantiate(_floorTile, position, Quaternion.identity, transform);
                     newCell.name = $"{x}, {z}";
-                    _grid[x, z] = newCell;
+
+                    Vector2Int coord = Maths.Vector3ToVector2Int(position);
+                    _grid.Add(coord, newCell);
 
                 }
             }
@@ -173,12 +171,9 @@ namespace SoulCollector {
             // If the cell is out of bounds, we cannot traverse it.
             if (IsOutOfBounds(position)) return false;
 
-            // Convert the position to ints.
-            int x = Maths.RoundToInt(position.x);
-            int z = Maths.RoundToInt(position.z);
-
             // If the cell has been destroyed, we cannot traverse it.
-            if (_grid[x, z] == null || _grid[x, z].DestroySelf) return false;
+            Vector2Int coord = Maths.Vector3ToVector2Int(position);
+            if (!_grid.ContainsKey(coord) || _grid[coord].DestroySelf) return false; 
 
             // If we get here, we can traverse it.
             return true;
@@ -186,21 +181,20 @@ namespace SoulCollector {
         }
 
         /// <summary>
-        /// Called when a grid cell has been stepped off of and can no longer be used.
+        /// Called when a grid cell has been stepped off of.
         /// </summary>
         /// <param name="position">The cell position we are stepping off of.</param>
-        public void DiscardCell(Vector3 position) {
+        public void TraverseCell(Vector3 position) {
 
             if (IsOutOfBounds(position)) {
                 Debug.LogError($"Attempted to discard cell at {position.x}, {position.y}, but that position is out of bounds.");
             }
 
-            // Convert the position to ints.
-            int x = Maths.RoundToInt(position.x);
-            int z = Maths.RoundToInt(position.z);
+            // This function is only called for tiles we are already standing on, so we don't need to worry about checking
+            // that the tile exists in the dictionary before accessing it.
+            Vector2Int coord = Maths.Vector3ToVector2Int(position);
+            _grid[coord].TakeDamage();
 
-            // Handle the grid cell.
-            _grid[x, z].DropTile();
         }
 
         /// <summary>

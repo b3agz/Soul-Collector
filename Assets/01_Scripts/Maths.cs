@@ -39,7 +39,7 @@ namespace John {
         /// </summary>
         /// <param name="start">The start value.</param>
         /// <param name="end">The end value.</param>
-        /// <param name="t">The interpolation factor, clamped between 0 and 1./param>
+        /// <param name="t">The interpolation factor, clamped between 0 and 1.</param>
         /// <returns></returns>
         public static float Lerp(float start, float end, float t) {
             float factor = Clamp(t, 0f, 1f);
@@ -86,7 +86,10 @@ namespace John {
             else return b;
         }
         
-        // Distance
+        /// <summary>
+        /// Converts a Vector3 to a Vector2Int, mapping the Z value of the Vector3 to the Y value of the Vector2Int.
+        /// </summary>
+        public static Vector2Int Vector3ToVector2Int(Vector3 position) => new (RoundToInt(position.x), RoundToInt(position.z));
 
     }
 }

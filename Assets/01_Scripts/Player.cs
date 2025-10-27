@@ -5,9 +5,6 @@ namespace SoulCollector {
 
     public class Player : MonoBehaviour {
 
-        [Tooltip("The amount of time after one movement before the player can move again.")]
-        [SerializeField] private float _coolDownAmount = 0.2f;
-
         [Tooltip("How quickly the character lerps from one position to another.")]
         [SerializeField] private float _lerpSpeed = 1f;
 
@@ -16,6 +13,9 @@ namespace SoulCollector {
 
         [Tooltip("How far the character leans (on the X rotation axis) when at the peak of the curve.")]
         [SerializeField] private float _leanAmount = 5f;
+
+        [Tooltip("How quickly the character rotates to face the direction they are moving.")]
+        [SerializeField] private float _rotateSpeed = 12f;
 
         [Tooltip("Particles prefab that is spawned every time the player collects a collectable.")]
         [SerializeField] private GameObject _particlesPrefab;
@@ -29,6 +29,7 @@ namespace SoulCollector {
         private bool _directionPressed;
         private bool _isLeaning;
         private float _deadZone = 0.2f;
+        private Vector3 _lookDirection;
 
         void Awake() {
 
@@ -52,6 +53,8 @@ namespace SoulCollector {
             else {
                 _up = _down = _left = _right = false;
             }
+            
+            TurnToLook();
 
             // If the lerp factor is less than one, that means we are currently moving, so move the character.
             if (_lerpFactor < 1f) {
@@ -79,7 +82,8 @@ namespace SoulCollector {
             else if (_left) direction.x--;
 
             // Set the player's forward direction to the direction we are moving.
-            transform.forward = direction;
+            //transform.forward = direction;
+            
 
             // Make sure the player is not moving out of the bounds of the grid.
             Vector3 newPosition = transform.position + direction;
@@ -89,7 +93,7 @@ namespace SoulCollector {
             _lerpStartPos = transform.position;
             _lerpEndPos = newPosition;
             _lerpFactor = 0;
-            Grid.Instance.DiscardCell(_lerpStartPos);
+            Grid.Instance.TraverseCell(_lerpStartPos);
 
         }
 
@@ -101,6 +105,9 @@ namespace SoulCollector {
             // Get player's input using GetAxis so that we can grab WASD, arrow, and gamepad controls.
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
+
+            // Create a direction vector with our input axis.
+            _lookDirection = new Vector3(horizontal, 0f, vertical);
 
             // Unity's horizontal and vertical axis produce an analogue -1 to 1 value, we need an on or off,
             // so convert them to bools factoring in a deadzone so the controls are not too sensitive.
@@ -143,6 +150,18 @@ namespace SoulCollector {
             // of the mesh, which is a child object of player object. As the player object always faces
             // "forward", we only need to rotate the local X axis.
             _meshesObject.localRotation = Quaternion.Euler(lean, 0f, 0f);
+
+        }
+
+        /// <summary>
+        /// Smoothly rotates the character to face the current look direction.
+        /// </summary>
+        private void TurnToLook() {
+
+            if (_lookDirection.sqrMagnitude > 0.001f) {
+                Quaternion target = Quaternion.LookRotation(_lookDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, target, Time.deltaTime * _rotateSpeed);
+            }
 
         }
 

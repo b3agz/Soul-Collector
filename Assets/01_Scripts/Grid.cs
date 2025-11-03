@@ -45,7 +45,7 @@ namespace SoulCollector {
 
         public bool HasCollectedAll =>_currentScore >= _numberOfCollectables;
 
-        public bool SuspendControls { get; private set; }
+        public bool SuspendControls { get; set; }
 
         // For setting the camera to the middle of the grid.
         public float HalfGrid => _gridSize / 2f;
@@ -71,7 +71,7 @@ namespace SoulCollector {
         /// Destroys all of the spawned items (grid tiles and collectables) and disables the player object.
         /// </summary>
         public void ClearGrid() {
-            
+
             // All instantiated level objects are spawned as children of this object, so to remove any that are
             // still in the scene, we just need to loop through the remaining children of this GameObject.
             foreach (Transform child in transform) {
@@ -90,9 +90,6 @@ namespace SoulCollector {
                 // Loop through each column.
                 for (int z = 0; z < _gridSize; z++) {
 
-                    int rnd = Random.Range(0, 10);
-                    if (rnd > 8) continue;
-                    
                     Vector3 position = new(x, 0f, z);
                     Tile newCell = Instantiate(_floorTile, position, Quaternion.identity, transform);
                     newCell.name = $"{x}, {z}";
@@ -173,29 +170,23 @@ namespace SoulCollector {
 
             // If the cell has been destroyed, we cannot traverse it.
             Vector2Int coord = Maths.Vector3ToVector2Int(position);
-            if (!_grid.ContainsKey(coord) || _grid[coord].DestroySelf) return false; 
+            if (!_grid.ContainsKey(coord) || _grid[coord].DestroySelf) return false;
 
             // If we get here, we can traverse it.
             return true;
 
         }
 
-        /// <summary>
-        /// Called when a grid cell has been stepped off of.
-        /// </summary>
-        /// <param name="position">The cell position we are stepping off of.</param>
-        public void TraverseCell(Vector3 position) {
+        public void FireTurret() {
 
-            if (IsOutOfBounds(position)) {
-                Debug.LogError($"Attempted to discard cell at {position.x}, {position.y}, but that position is out of bounds.");
-            }
+            // Sort tiles in ascending order of health (weakest first).
+            Tile[] tiles = Algorithms.BubbleSort(_grid);
 
-            // This function is only called for tiles we are already standing on, so we don't need to worry about checking
-            // that the tile exists in the dictionary before accessing it.
-            Vector2Int coord = Maths.Vector3ToVector2Int(position);
-            _grid[coord].TakeDamage();
+            _turret.SetTargets(tiles);
 
         }
+
+        public void PlayerMove() => _turret.AddStep();
 
         /// <summary>
         /// Updates the score UI element to reflect the current score.
@@ -210,6 +201,10 @@ namespace SoulCollector {
             if (_currentScore >= _numberOfCollectables) {
                 SuspendControls = true;
             }
+        }
+
+        public void RemoveTile(Vector2Int coord) {
+            _grid.Remove(coord);
         }
 
     }

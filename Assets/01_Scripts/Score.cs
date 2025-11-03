@@ -28,7 +28,9 @@ namespace SoulCollector {
         public void UpdateScore(int score, int maxScore, bool suppressBounce = false) {
             _slider.maxValue = maxScore;
             _target = score;
-            _scoreNumber.text = score.ToString();
+            if (_scoreNumber != null)
+                _scoreNumber.text = score.ToString();
+
             if (suppressBounce) return;
 
             if (_bounceRoutine != null) {
@@ -44,11 +46,13 @@ namespace SoulCollector {
             float factor = 0f;
             while (factor < 1f) {
                 transform.localScale = Vector3.one + (bounceVector * _bounceCurve.Evaluate(factor));
-                _scoreNumber.transform.localScale = (Vector3.one * 1.3f) + (bounceVector * _bounceCurve.Evaluate(factor));
+                if (_scoreNumber != null)
+                    _scoreNumber.transform.localScale = (Vector3.one * 1.3f) + (bounceVector * _bounceCurve.Evaluate(factor));
                 factor += Time.deltaTime * _bounceSpeed;
                 yield return null;
             }
-                transform.localScale = Vector3.one;
+            transform.localScale = Vector3.one;
+            if (_scoreNumber != null)
                 _scoreNumber.transform.localScale = Vector3.one;
         }
 

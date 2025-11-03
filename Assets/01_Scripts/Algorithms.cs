@@ -1,4 +1,6 @@
-using System .Collections.Generic;
+using System.Collections.Generic;
+using SoulCollector;
+using UnityEngine;
 
 namespace John {
 
@@ -84,6 +86,41 @@ namespace John {
         /// <param name="array">An array of integers.</param>
         /// <returns>A string containing the contents of the array, comma delimited.</returns>
         public static string ArrayToString(int[] array) => string.Join(", ", array);
+
+        public static Tile[] BubbleSort(Dictionary<Vector2Int, Tile> tiles) {
+
+            Tile[] array = new Tile[tiles.Count];
+            tiles.Values.CopyTo(array, 0);
+            int n = array.Length;
+            bool swapped = false;
+
+            // Loop for n times (the length of the array).
+            for (int i = 0; i < n - 1; i++) {
+
+                // At the start of each sort loop, reset swapped to false.
+                swapped = false;
+
+                // Iterate through the array and compare each element with the adjacent element.
+                for (int j = 0; j < n - 1; j++) {
+
+                    // If the current element is larger than the next, swap them and set swapped
+                    // to true.
+                    if (array[j].Health > array[j + 1].Health) {
+                        Tile temp = array[j];
+                        array[j] = array[j + 1];
+                        array[j + 1] = temp;
+                        swapped = true;
+                    }
+                }
+
+                // If no values were swapped in the last iteration, the collection has been sorted
+                // and we can end.
+                if (!swapped) break;
+            }
+
+            return array;
+
+        }
 
     }
 

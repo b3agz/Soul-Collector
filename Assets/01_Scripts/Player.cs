@@ -53,7 +53,7 @@ namespace SoulCollector {
             else {
                 _up = _down = _left = _right = false;
             }
-            
+
             TurnToLook();
 
             // If the lerp factor is less than one, that means we are currently moving, so move the character.
@@ -81,10 +81,6 @@ namespace SoulCollector {
             else if (_right) direction.x++;
             else if (_left) direction.x--;
 
-            // Set the player's forward direction to the direction we are moving.
-            //transform.forward = direction;
-            
-
             // Make sure the player is not moving out of the bounds of the grid.
             Vector3 newPosition = transform.position + direction;
             if (!Grid.Instance.CanTraverse(newPosition)) return;
@@ -93,7 +89,9 @@ namespace SoulCollector {
             _lerpStartPos = transform.position;
             _lerpEndPos = newPosition;
             _lerpFactor = 0;
-            Grid.Instance.TraverseCell(_lerpStartPos);
+
+            // Call Grid.PlayerMove() so the game knows the player has taken another move.
+            Grid.Instance.PlayerMove();
 
         }
 

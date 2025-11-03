@@ -4,7 +4,7 @@ namespace SoulCollector {
 
     public class Turret : MonoBehaviour {
 
-        [SerializeField] private Projectile _cannonBall; 
+        [SerializeField] private Projectile _cannonBall;
         [SerializeField] private float _rotateSpeed = 17f;
         private Vector3 _lookDirection;
 
@@ -28,13 +28,15 @@ namespace SoulCollector {
         private void Update() {
             TurnToLook();
         }
-        
+
         /// <summary>
         /// Smoothly rotates the character to face the current look direction.
         /// </summary>
-        private void TurnToLook() {
+        private void TurnToLook()
+        {
 
-            if (_lookDirection.sqrMagnitude > 0.001f) {
+            if (_lookDirection.sqrMagnitude > 0.001f)
+            {
                 Quaternion target = Quaternion.LookRotation(_lookDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, target, Time.deltaTime * _rotateSpeed);
             }

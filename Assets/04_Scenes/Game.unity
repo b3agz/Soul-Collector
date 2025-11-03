@@ -3621,6 +3621,7 @@ MonoBehaviour:
   _collectablePrefab: {fileID: 5529231214338328321, guid: 6a99a39bc56551a43a3db6606edae647, type: 3}
   _score: {fileID: 632779436}
   _player: {fileID: 1058619970}
+  _turret: {fileID: 1897379060}
 --- !u!4 &1846396410
 Transform:
   m_ObjectHideFlags: 0
@@ -3823,6 +3824,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1897379059}
+  - component: {fileID: 1897379060}
   m_Layer: 0
   m_Name: Cannon
   m_TagString: Untagged
@@ -3848,6 +3850,20 @@ Transform:
   - {fileID: 1106930120}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 148.238, z: 0}
+--- !u!114 &1897379060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1897379058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42bfb617f41d82d4eb604725e3b5308c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cannonBall: {fileID: 1377169916}
+  _rotateSpeed: 17
 --- !u!1 &1932055737
 GameObject:
   m_ObjectHideFlags: 0

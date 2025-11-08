@@ -37,6 +37,7 @@ namespace SoulCollector {
             // If the factor is at or over 1, we have reached our destination. Set fired to false
             // and deactivate the gameobject.
             if (_factor >= 1f) {
+                Grid.Instance.CheckForPlayerDeath(transform.position);
                 _fired = false;
                 _target.TakeDamage(_damage);
                 gameObject.SetActive(false);

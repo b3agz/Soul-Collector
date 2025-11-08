@@ -91,7 +91,8 @@ namespace SoulCollector {
             _lerpFactor = 0;
 
             // Call Grid.PlayerMove() so the game knows the player has taken another move.
-            Grid.Instance.PlayerMove();
+            Vector2Int coord = new((int)transform.position.x, (int)transform.position.z);
+            Grid.Instance.PlayerMove(coord);
 
         }
 

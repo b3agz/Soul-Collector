@@ -26,6 +26,9 @@ namespace SoulCollector {
         [Tooltip("The number the collectables in this grid.")]
         [SerializeField] private int _numberOfCollectables = 5;
 
+        [Tooltip("The meximum health a grid tile can have.")]
+        [field: SerializeField] public int MaxHealth { get; private set; } = 10;
+
         [Tooltip("The prefab for a solid floor tile.")]
         [SerializeField] private Tile _floorTile;
 
@@ -43,7 +46,9 @@ namespace SoulCollector {
 
         private int _currentScore;
 
-        public bool HasCollectedAll =>_currentScore >= _numberOfCollectables;
+        public bool HasCollectedAll => _currentScore >= _numberOfCollectables;
+
+        public bool GameOver = false;
 
         public bool SuspendControls { get; set; }
 
@@ -95,6 +100,7 @@ namespace SoulCollector {
                     newCell.name = $"{x}, {z}";
 
                     Vector2Int coord = Maths.Vector3ToVector2Int(position);
+                    newCell.Init(Random.Range(2, MaxHealth), coord);
                     _grid.Add(coord, newCell);
 
                 }
@@ -123,8 +129,11 @@ namespace SoulCollector {
             int i = 0;
             while (i < _numberOfCollectables || positions.Count < 1) {
                 int rndIndex = Random.Range(0, positions.Count);
-                Vector3 position = new(positions[rndIndex].x, 0f, positions[rndIndex].y);
+                Vector2Int coord = positions[rndIndex];
+
+                Vector3 position = new(coord.x, 0f, coord.y);
                 GameObject newCollectable = Instantiate(_collectablePrefab, position, Quaternion.identity, transform);
+                _grid[coord].MakeInvulnerable();
                 positions.RemoveAt(rndIndex);
                 i++;
             }
@@ -177,16 +186,35 @@ namespace SoulCollector {
 
         }
 
+        /// <summary>
+        /// Sorts the tile dictionary into an array of Tiles in ascending order of health.
+        /// </summary>
         public void FireTurret() {
 
             // Sort tiles in ascending order of health (weakest first).
             Tile[] tiles = Algorithms.BubbleSort(_grid);
-
             _turret.SetTargets(tiles);
 
         }
 
-        public void PlayerMove() => _turret.AddStep();
+        /// <summary>
+        /// Adds a step to the cannon counter and updates the health of the tile that was just
+        /// vacated by the player.
+        /// </summary>
+        /// <param name="coord"></param>
+        public void PlayerMove(Vector2Int coord) {
+            _turret.AddStep();
+
+            // If we have a tile at this location (this check should never be needed) see if the tile
+            // is invulnerable (health is greater than MaxHealth). If not, damage it.
+            if (_grid.TryGetValue(coord, out Tile tile)) {
+                if (tile.Health > MaxHealth || tile.Health == 1) return;
+                tile.TakeDamage(1);
+            } else {
+                Debug.LogError("Attempted to call PlayerMove on a tile that doesn't exist.");
+            }
+
+        }
 
         /// <summary>
         /// Updates the score UI element to reflect the current score.
@@ -205,6 +233,18 @@ namespace SoulCollector {
 
         public void RemoveTile(Vector2Int coord) {
             _grid.Remove(coord);
+        }
+
+        public void CheckForPlayerDeath(Vector3 position) {
+
+            Vector2Int deathCoord = Maths.Vector3ToVector2Int(position);
+            Vector2Int playerCoord = Maths.Vector3ToVector2Int(_player.transform.position);
+
+            if (deathCoord == playerCoord) {
+                GameOver = true;
+            }
+
+
         }
 
     }

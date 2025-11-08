@@ -20,6 +20,7 @@ namespace SoulCollector {
         }
 
         void Start() {
+            Time.timeScale = 1f;
         }
 
         void Update() {
@@ -31,8 +32,14 @@ namespace SoulCollector {
                 if (Input.GetKeyDown(KeyCode.Escape)) {
                     PauseGame();
                 } else {
-                    if (Grid.Instance.HasCollectedAll) {
+
+                    // If the fail and win states both happen in the same frame, sorry bro, you lose.
+                    if (Grid.Instance.GameOver) {
+                        SetMenu(_gameOverMenu, true);
+                        Time.timeScale = 0f;
+                    } else if (Grid.Instance.HasCollectedAll) {
                         SetMenu(_gameWonMenu, true);
+                        Time.timeScale = 0f;
                     }
                 }
             }
@@ -80,7 +87,7 @@ namespace SoulCollector {
             Time.timeScale = 1f;
             _pauseMenu.SetActive(false);
         }
-        
+
         /// <summary>
         /// Sets given Menu GameObject's active state to state, checking that the menu exists first.
         /// </summary>

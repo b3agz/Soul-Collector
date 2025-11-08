@@ -50,6 +50,10 @@ namespace SoulCollector {
             // Don't take damage if we are already destroyed and just haven't despawned yet.
             if (DestroySelf) return;
 
+            // If we have more than max health, we are an invulnerable tile. We should never be aimed at, but
+            // on the off chance this function gets called, make sure we don't take damage.
+            if (Health > Grid.Instance.MaxHealth) return;
+
             Health = Mathf.Max(0, Health - 1);
             if (Health <= 0) {
                 DropTile();

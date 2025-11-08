@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 using Unity.VisualScripting;
 
 namespace SoulCollector {
@@ -41,6 +42,17 @@ namespace SoulCollector {
 
             // Prevent player from moving until we are done firing our balls.
             Grid.Instance.SuspendControls = true;
+
+            StartCoroutine(ShowTargetMarkers());
+
+        }
+
+        private IEnumerator ShowTargetMarkers() {
+
+            for (int i = 0; i < _shotsPerRound; i++) {
+                _targets[i].ShowMarker();
+                yield return new WaitForSeconds(0.5f);
+            }
 
             Fire();
 

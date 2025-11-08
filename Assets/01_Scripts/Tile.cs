@@ -14,6 +14,7 @@ namespace SoulCollector {
         [SerializeField] private Color _invulnerableColour;
         [SerializeField] private MeshRenderer _meshRenderer;
         [SerializeField] private TextMeshPro _healthIndicator;
+        [SerializeField] private GameObject _targetMarker;
 
         private Color _currentColour => _colours[_colourIndex];
         private int _colourIndex = 0;
@@ -64,6 +65,16 @@ namespace SoulCollector {
 
             _healthIndicator.text = Health.ToString();
         }
+
+        /// <summary>
+        /// Shows the target marker for this tile.
+        /// </summary>
+        public void ShowMarker() => _targetMarker.SetActive(true);
+
+        /// <summary>
+        /// Hides the target marker for this tile.
+        /// </summary>
+        public void HideMarker() => _targetMarker.SetActive(false);
 
         /// <summary>
         /// Sets this tile to drop away, becoming no longer traversible.

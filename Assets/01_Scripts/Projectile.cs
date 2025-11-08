@@ -39,6 +39,7 @@ namespace SoulCollector {
             if (_factor >= 1f) {
                 Grid.Instance.CheckForPlayerDeath(transform.position);
                 _fired = false;
+                _target.HideMarker();
                 _target.TakeDamage(_damage);
                 gameObject.SetActive(false);
                 _onComplete?.Invoke();

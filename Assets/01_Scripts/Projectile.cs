@@ -52,13 +52,7 @@ namespace SoulCollector {
         /// </summary>
         /// <param name="startPos">Where the ball is starting from.</param>
         /// <param name="target">Where the ball should end up.</param>
-        public void Fire(Vector3 startPos, Tile tile, bool canSee, Action onComplete) {
-
-            if (!canSee) {
-                tile.HideMarker();
-                onComplete?.Invoke();
-                return;
-            }
+        public void Fire(Vector3 startPos, Tile tile, Action onComplete) {
 
             _fired = true;
             _startPos = startPos;

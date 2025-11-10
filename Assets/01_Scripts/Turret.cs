@@ -11,8 +11,11 @@ namespace SoulCollector {
         [SerializeField] private Projectile _cannonBall;
         [SerializeField] private float _rotateSpeed = 17f;
         [SerializeField] private Score _powerBar;
+        [SerializeField] private Transform _cannonMouth;
         [SerializeField] private GameObject _cannonTurnSign;
+        [SerializeField] private GameObject _cantSeeText;
         [SerializeField] private LayerMask _layerMask;
+        [SerializeField] private LineRenderer _laserSight;
         private Vector3 _lookDirection;
         private Tile _target;
         private int _currentSteps = 0;
@@ -53,13 +56,59 @@ namespace SoulCollector {
         /// </summary>
         private IEnumerator ShowTargetMarkers() {
 
+            // If we encounter targets we can't hit, we need to remove them from the targets list.
+            // We can'd do that during the loop as it will cause us to skip over one after the list
+            // is reshuffled, so we add any unhittable target tiles to a list of ints and remove
+            // them after.
+            List<Tile> tilesToRemove = new();
+
             // Make sure the player knows it's the cannon's turn so they're not confused as to why
             // they can't move.
             _cannonTurnSign.SetActive(true);
             for (int i = 0; i < _shotsPerRound; i++) {
-                _targets[i].ShowMarker();
-                yield return new WaitForSeconds(0.5f);
+
+                _laserSight.gameObject.SetActive(false);
+                _lookDirection = (_targets[i].transform.position - transform.position).normalized;
+
+                // Hacky bullshit to give cannon chance to rotate to face new target.
+                yield return new WaitForSeconds(0.25f);
+
+                _laserSight.gameObject.SetActive(true);
+
+                Ray ray = new(transform.position, _lookDirection);
+                float distance = Vector3.Distance(_targets[i].transform.position, transform.position);
+
+                Vector3[] points = new Vector3[2];
+                points[0] = _cannonMouth.position;
+
+                // Run a raycast to see if there are any obstacles between the turret and the target tile.
+                if (Physics.Raycast(ray, out RaycastHit hitInfo, distance, _layerMask)) {
+
+                    // If we hit an obstacle, the lasersight should end where the hit was.
+                    points[1] = hitInfo.point;
+                    tilesToRemove.Add(_targets[i]);
+                    _cantSeeText.SetActive(true);
+
+                }
+                else {
+
+                    // If we don't hit an obstacle, end the lasersight at the target and activate the marker.
+                    points[1] = _targets[i].transform.position;
+                    _targets[i].ShowMarker();
+
+                }
+
+                _laserSight.SetPositions(points);
+                yield return new WaitForSeconds(1f);
+                _cantSeeText.SetActive(false);
             }
+
+            // Remove unhittable targets from our targets list.
+            foreach(Tile tile in tilesToRemove) {
+                _targets.Remove(tile);
+            }
+
+            _laserSight.gameObject.SetActive(false);
 
             Fire();
 
@@ -77,25 +126,21 @@ namespace SoulCollector {
                 return;
             }
 
+            StartCoroutine(DelayedFire());
+
+        }
+
+        private IEnumerator DelayedFire() {
+
             // Get the top (weakest) tile and then remove it from the list.
             Tile tile = _targets[0];
             _targets.RemoveAt(0);
 
-            // Make sure cannon can see the target.
-            Vector3 direction = (tile.transform.position - transform.position).normalized;
-            Ray ray = new(transform.position, direction);
-            float distance = Vector3.Distance(tile.transform.position, transform.position);
+            _lookDirection = (tile.transform.position - transform.position).normalized;
 
-            // Sanity check.
-            Debug.DrawLine(transform.position, tile.transform.position, Color.red, 1f);
+            yield return new WaitForSeconds(0.25f);
 
-            // Run a raycast to see if there are any obstacles between the turret and the target tile.
-            bool canSee = !Physics.Raycast(ray, distance, _layerMask);
-
-            // Give the cannonball the target tile and tell it to fire. It has a callback to this function, so
-            // we get back here once the cannon has finished it's journey. If we can't see the target
-            // (canSee is false), we just reset the target and come back here.
-            _cannonBall.Fire(transform.position, tile, canSee, Fire);
+            _cannonBall.Fire(_cannonMouth.position, tile, Fire);
 
         }
 

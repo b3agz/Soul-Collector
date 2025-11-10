@@ -43,8 +43,8 @@ namespace SoulCollector {
                 _target.TakeDamage(_damage);
                 gameObject.SetActive(false);
                 _onComplete?.Invoke();
-            }
 
+            }
         }
 
         /// <summary>

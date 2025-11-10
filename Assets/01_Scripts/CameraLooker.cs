@@ -7,6 +7,7 @@ namespace SoulCollector {
 
         [SerializeField] private float _followSpeed = 0.3f;
         [SerializeField] private float _sensitivity = 4f;
+        [SerializeField] private float _zPosLock = 4f;
         [SerializeField] private float _maxHorizontal = 3f;
         [SerializeField] private float _minHorizontal = 1f;
         [SerializeField] private float _idleTime = 2f;
@@ -38,6 +39,9 @@ namespace SoulCollector {
             // Get the player position and set the x position to xValue.
             Vector3 targetPos = _player.position;
             targetPos.x = _xValue;
+
+            // Lock our Z position so we don't tilt forwards and backwards.
+            targetPos.z = _zPosLock;
 
             // Get the current and desired rotation and the Slerp between the two.
             Quaternion startRot = transform.rotation;

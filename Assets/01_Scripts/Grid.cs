@@ -50,6 +50,9 @@ namespace SoulCollector {
         [Tooltip("The cannon controller.")]
         [SerializeField] private Turret _turret;
 
+        // 0 = Bubble Sort, 1 = Insertion Sort.
+        public static int SortMethod { get; private set; } = 1;
+
         private int _currentScore;
 
         public bool HasCollectedAll => _currentScore >= _numberOfCollectables;
@@ -216,8 +219,15 @@ namespace SoulCollector {
         public void FireTurret() {
 
             // Sort tiles in ascending order of health (weakest first).
-            Tile[] tiles = Algorithms.BubbleSort(_grid);
-            _turret.SetTargets(tiles);
+
+            if (SortMethod == 0) {
+                Tile[] tiles = Algorithms.BubbleSort(_grid);
+                _turret.SetTargets(tiles);
+            }
+            else {
+                List<Tile> tiles = Algorithms.InsertionSort(_grid);
+                _turret.SetTargets(tiles.ToArray());
+            }
 
         }
 
@@ -234,7 +244,8 @@ namespace SoulCollector {
             if (_grid.TryGetValue(coord, out Tile tile)) {
                 if (tile.Health > MaxHealth || tile.Health == 1) return;
                 tile.TakeDamage(1);
-            } else {
+            }
+            else {
                 Debug.LogError("Attempted to call PlayerMove on a tile that doesn't exist.");
             }
 
@@ -268,6 +279,28 @@ namespace SoulCollector {
                 GameOver = true;
             }
 
+        }
+
+        /// <summary>
+        /// Sets the sorting method to use.
+        /// 0 = Bubble Sort
+        /// 1 = Insertion Sort
+        /// </summary>
+        /// <param name="value">The value of the sorting method.</param>
+        public static void SetSortMethod(int value) {
+
+            SortMethod = value;
+            switch (value) {
+                case 0:
+                    Debug.Log("Sort Method set to Bubble Sort");
+                    break;
+                case 1:
+                    Debug.Log("Sort Method set to Insertion Sort");
+                    break;
+                default:
+                    Debug.LogError("Attempted to set sort method to a method we don't have!");
+                    break;
+            }
 
         }
 

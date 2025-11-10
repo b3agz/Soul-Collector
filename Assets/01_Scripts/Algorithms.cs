@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using SoulCollector;
 using UnityEngine;
 
@@ -119,6 +120,39 @@ namespace John {
             }
 
             return array;
+
+        }
+
+        public static List<Tile> InsertionSort(Dictionary<Vector2Int, Tile> tiles) {
+
+            List<Tile> list = tiles.Values.ToList<Tile>();
+
+            int n = list.Count;
+
+            // The first list item has nothing before it, so we start iteration from the second item.
+            for (int i = 1; i < n; i++) {
+
+                // Cache the current iteration's value and the initialise the inner loops iterator as our
+                // current iteration minus 1.
+                Tile key = list[i];
+                int j = i - 1;
+
+                // Loop until either the inner loop iterator is at zero, or the list item being checked is
+                // greater than the key we cached above.
+                while (j >= 0 && list[j].Health > key.Health) {
+
+                    // If the current item is less than the key, move it up one and decrement the inner loop
+                    // iterator.
+                    list[j + 1] = list[j];
+                    j--;
+
+                }
+
+                // Once we've reached the end of the inner loop, set the key to our last value before moving on.
+                list[j + 1] = key;
+            }
+
+            return list;
 
         }
 

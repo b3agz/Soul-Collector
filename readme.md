@@ -32,4 +32,4 @@ This project was created under a specific set of constraints designed to focus o
 
 ## License
 
-As this repo needs to be public per the course module requirements, I have put it under the MIT license. You can find the [full details here](readme.md), but the gist of it is you can use this code if you want, for any reason you want, you don't need to credit me, but you do so at your own risk and I am not liable for any issues you encounter.
+As this repo needs to be public per the course module requirements, I have put it under the MIT license. You can find the [full details here](LICENSE.md), but the gist of it is you can use this code if you want, for any reason you want, you don't need to credit me, but you do so at your own risk and I am not liable for any issues you encounter.

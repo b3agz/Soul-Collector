@@ -57,12 +57,7 @@ namespace SoulCollector {
         /// Starts a new game, disabling all the menus and calling the relevant functions to reset the level.
         /// </summary>
         public void NewGame() {
-            SetMenu(_gameWonMenu, false);
-            SetMenu(_scoreBoard, true);
-            SetMenu(_mainMenuAssets, false);
-            UnPauseGame();
-            Grid.Instance.ClearGrid();
-            Grid.Instance.NewGame();
+            SceneManager.LoadScene("Game");
         }
 
         /// <summary>

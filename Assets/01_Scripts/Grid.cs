@@ -26,11 +26,17 @@ namespace SoulCollector {
         [Tooltip("The number the collectables in this grid.")]
         [SerializeField] private int _numberOfCollectables = 5;
 
+        [Tooltip("The number the obstacles in this grid.")]
+        [SerializeField] private int _numberOfObstacles = 3;
+
         [Tooltip("The meximum health a grid tile can have.")]
         [field: SerializeField] public int MaxHealth { get; private set; } = 10;
 
         [Tooltip("The prefab for a solid floor tile.")]
         [SerializeField] private Tile _floorTile;
+
+        [Tooltip("The prefab for a solid floor tile.")]
+        [SerializeField] private GameObject _gridObstaclePrefab;
 
         [Tooltip("The prefab for the collectables")]
         [SerializeField] private GameObject _collectablePrefab;
@@ -96,6 +102,7 @@ namespace SoulCollector {
                 for (int z = 0; z < _gridSize; z++) {
 
                     Vector3 position = new(x, 0f, z);
+
                     Tile newCell = Instantiate(_floorTile, position, Quaternion.identity, transform);
                     newCell.name = $"{x}, {z}";
 
@@ -128,6 +135,7 @@ namespace SoulCollector {
             // a collectable at any of the locations. Once used, we remove it from the list so that it isn't used again.
             int i = 0;
             while (i < _numberOfCollectables || positions.Count < 1) {
+
                 int rndIndex = Random.Range(0, positions.Count);
                 Vector2Int coord = positions[rndIndex];
 
@@ -136,6 +144,22 @@ namespace SoulCollector {
                 _grid[coord].MakeInvulnerable();
                 positions.RemoveAt(rndIndex);
                 i++;
+
+            }
+
+            i = 0;
+            while (i < _numberOfObstacles || positions.Count < 1) {
+
+                int rndIndex = Random.Range(0, positions.Count);
+                Vector2Int coord = positions[rndIndex];
+
+                Vector3 position = new(coord.x, 0f, coord.y);
+                GameObject newCollectable = Instantiate(_gridObstaclePrefab, position, Quaternion.identity, transform);
+                Destroy(_grid[coord].gameObject);
+                _grid.Remove(coord);
+                positions.RemoveAt(rndIndex);
+                i++;
+
             }
 
             int playerIndex = Random.Range(0, positions.Count);

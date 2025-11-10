@@ -4773,6 +4773,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _followSpeed: 0.2
   _sensitivity: 4
+  _zPosLock: 4
   _maxHorizontal: -1
   _minHorizontal: 1
   _idleTime: 2
@@ -4889,8 +4890,10 @@ MonoBehaviour:
   CameraShake: {fileID: 1766244833}
   _gridSize: 5
   _numberOfCollectables: 5
+  _numberOfObstacles: 3
   <MaxHealth>k__BackingField: 10
   _floorTile: {fileID: 3667704935363763341, guid: f8ac5c4c6436ae742b356a82d7869bf5, type: 3}
+  _gridObstaclePrefab: {fileID: 8747845096015962997, guid: 6748970a5d3759848ad56c657a4dd69a, type: 3}
   _collectablePrefab: {fileID: 5529231214338328321, guid: 6a99a39bc56551a43a3db6606edae647, type: 3}
   _score: {fileID: 632779436}
   _player: {fileID: 1058619970}
@@ -5277,6 +5280,9 @@ MonoBehaviour:
   _cannonBall: {fileID: 1377169916}
   _rotateSpeed: 17
   _powerBar: {fileID: 2063033719}
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &1932055737
 GameObject:
   m_ObjectHideFlags: 0
